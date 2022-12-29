@@ -2,7 +2,7 @@
 
 % p(Grid1,Grid2,...) :- add_to_grid(Grid1,Grid3).
 
-% -> p(*grid1,*grid2,...){ add_to_grid(*grid1,*grid3);}
+% -> p(grid1,grid2,...){ add_to_grid(grid1,grid3);}
 
 
 lp2c1(Algorithm1,Algorithm2) :-
@@ -253,7 +253,7 @@ interpretstatementlp2c3([],"[]") :-
 interpretstatementlp2c3([n,cut],"!") :- !.
 interpretstatementlp2c3([n,Name],Name) :- !.
 interpretstatementlp2c3([v,Name1],Name2) :- %string_concat(A,B,Name1),atom_length(A,1),%upcase_atom(A,A1),
-string_concat("*",Name1,Name2),!.
+string_concat("",Name1,Name2),!.
 %%interpretstatementlp2c3([],"[]") :- !.
 %%interpretstatementlp2c3("","\"\"") :- !.
 interpretstatementlp2c3(Term1,Term2) :-
