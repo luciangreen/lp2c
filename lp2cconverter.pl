@@ -7,7 +7,7 @@
 
 lp2c1(Algorithm1,Algorithm2) :-
 	%% note: without type, mode statements
-	memberlp2c10(Algorithm1,"",Algorithm2).
+	memberlp2c10(Algorithm1,"#include <stdio.h>\n#include <stdlib.h>\n",Algorithm2).
 		%%string_concat(Algorithm3,"]",Algorithm2).
 
 memberlp2c10([],Algorithm1,Algorithm1) :- !.
@@ -18,7 +18,8 @@ memberlp2c10(Functions2,Algorithm1,Algorithm2) :-
 
 memberlp2c1(Functions2,Algorithm1,Algorithm2) :-
         Functions2=[Function,Arguments2,_Symbol,Body],
-        interpretstatementlp2c2a(Function,Algorithm1,Algorithm3a),
+                	string_concat(Algorithm1,"int ",Algorithm1a),
+        interpretstatementlp2c2a(Function,Algorithm1a,Algorithm3a),
         	string_concat(Algorithm3a,"(",Algorithm3d),
         interpretstatementlp2c2(Arguments2,Algorithm3d,Algorithm3e),
         	string_concat(Algorithm3e,"){",Algorithm3f),
@@ -32,7 +33,7 @@ memberlp2c1(Functions2,Algorithm1,Algorithm2) :-
 memberlp2c1(Functions2,Algorithm1,Algorithm2) :-
         Functions2=[Function,_Symbol,Body],
         interpretstatementlp2c2a(Function,Algorithm1,Algorithm3b),
-                	concat_list([Algorithm3b,"(){"],Algorithm3a),
+                	concat_list([Algorithm3b,"(void){"],Algorithm3a),
 		%%string_concat(Algorithm3a,"(",Algorithm3d),
         interpretbodylp2c(Body,Algorithm3a,Algorithm2a),
         write_full_stop_if_last_item([],Algorithm2a,Algorithm2),!.
