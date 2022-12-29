@@ -47,7 +47,11 @@ Algorithm2 - is the Prolog algorithm produced.
 * For example:
 ```
 test(2,_,A,_),lp2c1(A,B),write(B).
-function(*a,*b,*c){+(*a,*b,*d);+(*d,1,*c);}
+
+#include <stdio.h>
+#include <stdlib.h>
+int function(a,b,c){+(a,b,d);+(d,1,c);}
+
 ```
 
 # Authors
