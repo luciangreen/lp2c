@@ -259,8 +259,8 @@ string_concat("",Name1,Name2),!.
 %%interpretstatementlp2c3("","\"\"") :- !.
 interpretstatementlp2c3(Term1,Term2) :-
 %not(is_list(Term1)),
-not(contains_var1([v,_],Term1)),
-not(contains_var1([n,_],Term1)),
+not(contains_var([v,_],Term1)),
+not(contains_var([n,_],Term1)),
 term_to_atom(Term1,Term1a),
  foldr(string_concat,[Term1a],Term2),!.
 
