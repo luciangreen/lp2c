@@ -1,5 +1,7 @@
 %% lp2c
 
+:- discontiguous interpretstatementlp2c3/2.
+
 % p(Grid1,Grid2,...) :- add_to_grid(Grid1,Grid3).
 
 % -> p(grid1,grid2,...){ add_to_grid(grid1,grid3);}
@@ -197,18 +199,18 @@ write_comma_and_newline_if_not_empty_list(Statements2,Algorithm6,Algorithm7) :-
 	Algorithm6=Algorithm7),!.
 
 write_full_stop_if_last_item(Statements2,Algorithm8,Algorithm2) :-
-	((length(Statements2,A),(A=0%%->true;A=1
+	((length(Statements2,A),(A=0->true;A=1
 	)
 	)->string_concat(Algorithm8,";}\n",Algorithm2);
 	Algorithm8=Algorithm2),!.
 
 write_close_bracket_and_full_stop_if_last_item(Statements2,Algorithm8,Algorithm2) :-
-	((length(Statements2,A),(A=0%%->true;A=1
+	((length(Statements2,A),(A=0->true;A=1
 	))->string_concat(Algorithm8,").\n",Algorithm2);
 	Algorithm8=Algorithm2),!.
 
 write_close_bracket_if_last_item(Statements2,Algorithm8,Algorithm2) :-
-	((length(Statements2,A),(A=0%%->true;A=1
+	((length(Statements2,A),(A=0->true;A=1
 	))->string_concat(Algorithm8,")",Algorithm2);
 	Algorithm8=Algorithm2),!.
 
@@ -219,6 +221,14 @@ write_close_bracket_and_comma_if_not_empty_list(Statements2,Algorithm6,Algorithm
 interpretstatementlp2c1(Statement,Algorithm1,Algorithm2) :-
 	Statement=[[N_or_v,Name]],(N_or_v=n;N_or_v=v),
 	interpretstatementlp2c2a([N_or_v,Name],Algorithm1,Algorithm2),!.
+
+% Handle function calls like [[n,'+'], [v,a], [v,b], [v,c]]
+interpretstatementlp2c1([FuncName|Arguments],Algorithm1,Algorithm2) :-
+	FuncName = [N_or_v,Name], (N_or_v=n;N_or_v=v),
+	interpretstatementlp2c2a([N_or_v,Name],Algorithm1,Algorithm3a),
+	string_concat(Algorithm3a,"(",Algorithm3),
+	interpretstatementlp2c2(Arguments,Algorithm3,Algorithm4),
+	string_concat(Algorithm4,")",Algorithm2),!.
         	
 interpretstatementlp2c1(Statement,Algorithm1,Algorithm2) :-
 	Statement=[[N_or_v,Name],Arguments],(N_or_v=n;N_or_v=v),
@@ -251,6 +261,14 @@ interpretstatementlp2c2a(Arguments1,Algorithm1,Algorithm2) :-
 interpretstatementlp2c3([],"[]") :- 
 !.
 
+% Handle strings (atoms starting and ending with quotes)
+interpretstatementlp2c3(String, String) :-
+    atom(String),
+    atom_chars(String, Chars),
+    Chars = ['"'|_],
+    last(Chars, '"'),
+    !.
+
 interpretstatementlp2c3([n,cut],"!") :- !.
 interpretstatementlp2c3([n,Name],Name) :- !.
 interpretstatementlp2c3([v,Name1],Name2) :- %string_concat(A,B,Name1),atom_length(A,1),%upcase_atom(A,A1),
@@ -263,6 +281,15 @@ not(contains_var([v,_],Term1)),
 not(contains_var([n,_],Term1)),
 term_to_atom(Term1,Term1a),
  foldr(string_concat,[Term1a],Term2),!.
+
+interpretstatementlp2c3([Term1|Term1a],Term2) :- 
+    % Special case: single string in list -> just the string
+    Term1a = [],
+    atom(Term1),
+    atom_chars(Term1, Chars),
+    Chars = ['"'|_],
+    last(Chars, '"'),
+    Term2 = Term1, !.
 
 interpretstatementlp2c3([Term1|Term1a],Term2) :- interpretstatementlp2c3(Term1,Term3),	
 (Term1a=[]->
@@ -277,6 +304,37 @@ interpretstatementlp2c4([Term1|Term1a],Term2) :- interpretstatementlp2c3(Term1,T
 (interpretstatementlp2c4(Term1a,Term3a),	
  foldr(string_concat,[Term3,",",Term3a],Term2))),!.
 %	string_concat("[",Term3,Term4),	string_concat(Term4,"]",Term2),!.
+
+%% Missing utility predicates
+
+% predicate_or_rule_name/1 - checks if a term is a predicate or rule name
+predicate_or_rule_name([n,Name]) :- atom(Name), !.
+predicate_or_rule_name([v,Name]) :- atom(Name), !.
+predicate_or_rule_name(Name) :- atom(Name), !.
+
+% contains_var/2 - checks if Term2 contains the variable pattern Term1
+contains_var(Pattern, Term) :-
+    Pattern = [v,_],
+    Term =.. [_|Args],
+    member(Arg, Args),
+    contains_var_in_arg(Pattern, Arg).
+
+contains_var_in_arg([v,Var], [v,Var]) :- !.
+contains_var_in_arg([v,Var], [v,Var2]) :- Var == Var2, !.
+contains_var_in_arg(Pattern, Term) :-
+    is_list(Term),
+    member(Arg, Term),
+    contains_var_in_arg(Pattern, Arg).
+
+% foldr/3 - right fold operation on lists
+foldr(_, [X], X) :- !.
+foldr(Pred, [H|T], Result) :-
+    foldr(Pred, T, TResult),
+    call(Pred, H, TResult, Result).
+
+% concat_list/2 - concatenates a list of strings into one string
+concat_list(List, Result) :-
+    foldr(string_concat, List, Result).
 
 interpretstatementlp2c3(Value1,Value2):-term_to_atom(Value1,Value2),!.
 
