@@ -1,0 +1,15 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# SWI-Prolog compiled files
+*.qlf
+
+# Test output files
+test_output.txt
+debug_*.pl
